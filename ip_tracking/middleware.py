@@ -1,6 +1,7 @@
 import socket
 from django.conf import settings
-from .models import RequestLog
+from django.http import HttpResponseForbidden
+from .models import RequestLog, BlockedIP
 
 class IPLoggingMiddleware:
     def __init__(self, get_response):
@@ -9,6 +10,10 @@ class IPLoggingMiddleware:
     def __call__(self, request):
         # Get the client IP address
         ip_address = self.get_client_ip(request)
+        
+        # Check if IP is blocked before processing the request
+        if self.is_ip_blocked(ip_address):
+            return HttpResponseForbidden("IP address blocked")
         
         # Process the request
         response = self.get_response(request)
@@ -38,6 +43,12 @@ class IPLoggingMiddleware:
         except (socket.error, OSError):
             return request.META.get('REMOTE_ADDR', '0.0.0.0')
     
+    def is_ip_blocked(self, ip_address):
+        """
+        Check if the IP address is in the blocklist
+        """
+        return BlockedIP.objects.filter(ip_address=ip_address).exists()
+    
     def log_request(self, ip_address, path):
         """
         Log the request to the database
@@ -50,3 +61,4 @@ class IPLoggingMiddleware:
         except Exception as e:
             if settings.DEBUG:
                 print(f"Error logging request: {e}")
+                
