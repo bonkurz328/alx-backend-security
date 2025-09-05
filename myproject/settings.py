@@ -123,3 +123,23 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Add cache settings
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# IPinfo.io API key (optional but recommended for higher limits)
+IPINFO_API_KEY = 'your_ipinfo_io_api_key_here'  # Get from https://ipinfo.io/
+
+# Rate limiting settings
+RATELIMIT_VIEW = 'ip_tracking.views.rate_limit_exceeded'  # Custom view for rate limit exceeded
+RATELIMIT_USE_CACHE = 'default'
+RATELIMIT_CACHE_PREFIX = 'rl:'
+
+# Optional: Custom rate limit exceeded view settings
+RATELIMIT_ENABLE = True
+RATELIMIT_HTTP_STATUS_CODE = 429  # Too Many Requests

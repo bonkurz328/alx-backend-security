@@ -2,6 +2,7 @@ import socket
 from django.conf import settings
 from django.http import HttpResponseForbidden
 from .models import RequestLog, BlockedIP
+from .geolocation import geolocation_service
 
 class IPLoggingMiddleware:
     def __init__(self, get_response):
@@ -18,7 +19,7 @@ class IPLoggingMiddleware:
         # Process the request
         response = self.get_response(request)
         
-        # Log the request after processing
+        # Log the request after processing (with geolocation)
         self.log_request(ip_address, request.path)
         
         return response
@@ -51,12 +52,28 @@ class IPLoggingMiddleware:
     
     def log_request(self, ip_address, path):
         """
-        Log the request to the database
+        Log the request to the database with geolocation data
         """
         try:
+            # Get geolocation data
+            geolocation_data = geolocation_service.get_geolocation(ip_address)
+            
+            # Extract location information
+            country = None
+            city = None
+            region = None
+            
+            if geolocation_data and not geolocation_data.get('error'):
+                country = geolocation_data.get('country')
+                city = geolocation_data.get('city')
+                region = geolocation_data.get('region')
+            
             RequestLog.objects.create(
                 ip_address=ip_address,
-                path=path
+                path=path,
+                country=country,
+                city=city,
+                region=region
             )
         except Exception as e:
             if settings.DEBUG:
