@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class RequestLog(models.Model):
     ip_address = models.GenericIPAddressField()
@@ -48,4 +49,24 @@ class IPGeolocationCache(models.Model):
     
     def __str__(self):
         return f"{self.ip_address} - {self.country}"
+
+class SuspiciousIP(models.Model):
+    ip_address = models.GenericIPAddressField(unique=True)
+    reason = models.CharField(max_length=255)
+    first_detected = models.DateTimeField(default=timezone.now)
+    last_detected = models.DateTimeField(default=timezone.now)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        verbose_name = "Suspicious IP"
+        verbose_name_plural = "Suspicious IPs"
+        ordering = ['-last_detected']
+    
+    def __str__(self):
+        return f"{self.ip_address} - {self.reason}"
+    
+    def update_detection_time(self):
+        """Update the last detected timestamp"""
+        self.last_detected = timezone.now()
+        self.save()
         

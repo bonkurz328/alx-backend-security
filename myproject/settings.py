@@ -143,3 +143,11 @@ RATELIMIT_CACHE_PREFIX = 'rl:'
 # Optional: Custom rate limit exceeded view settings
 RATELIMIT_ENABLE = True
 RATELIMIT_HTTP_STATUS_CODE = 429  # Too Many Requests
+
+# Celery Configuration - Use in-memory broker for development
+CELERY_BROKER_URL = 'memory://'
+CELERY_RESULT_BACKEND = 'cache+memory://'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'

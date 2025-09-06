@@ -22,5 +22,8 @@ venv/
 .DS_Store
 Thumbs.db
 
+# Windows special files
+nul
+
 # Database migrations (optional - some keep them, some don't)
 # ip_tracking/migrations/
